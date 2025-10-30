@@ -62,7 +62,8 @@ To test this hypothesis, the NEURON model:
 **Neuron Heterodyning Model Diagram**  
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/139307e5-e0e9-41fb-8343-7644806e2f3d" width="350" alt="Neuron heterodyning model diagram">
+  <img src="https://github.com/user-attachments/assets/3fe820ef-4581-46d6-947a-671e52393870" >
+
 </div>
 
 **Electronic Circuit Representation of Neuron**  
