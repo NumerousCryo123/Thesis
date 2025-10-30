@@ -82,7 +82,7 @@ The neuron can be represented as an **electro-chemical integrate-and-fire cell**
 
 | File            | Purpose |
 |-----------------|---------|
-| `axon10.hoc`   | Constructs a model of a myelinated neuron and axon in the CNS. The model includes a synapse from where one can put in intracellular stimulus. Further it uses Double-Cable model that extends to electrical extracellular fields or RC network attached to a voltage source. Here, one can stimulate the neuron extracellularly |
+| `axon10.hoc`   | Constructs a model of a myelinated neuron and axon in the CNS. The model includes a synapse from where one can put in intracellular stimulus. Further it uses Double-Cable model that extends to electrical extracellular fields or RC network attached to a voltage source. Here, one can stimulate the neuron extracellularly. |
 | `initB5.hoc`     | Stimulates the neuron with **one endogenous wave** and another exogenous wave simultaneously. |
 | `initA.hoc`    | Stimulates the neuron **with two   endogneously applied** sine waves. |
 | `initB5.hoc`     | Stimulates the neuron with **two exogenously applied  waves** simultaneously. |
@@ -94,5 +94,10 @@ The neuron can be represented as an **electro-chemical integrate-and-fire cell**
 
 1. Download entire codebase to a location on your computer and unzip.
 2. Open command terminal for windows and then cd to the place you have saved.
-3. Run nrnivmodl.
-4. Run mosinit.hoc or nrnguimosinit.hoc
+3. Download neuron.
+4. Run nrnivmodl.
+5. Run mosinit.hoc or nrnguimosinit.hoc
+6. Three buttons pop up choose any to see corresponding time domain effect from stimulation in yellow curve label.
+7. To do FFT analysis- there will be  a graph with a yellow curve run till end of simulation or change it to shorter period of time if your sampling frequency is higher, right click on it and select pick vector.
+8. Click on the yellow curve.
+9. Go to Vector option in top and choose save to option in.dat format
