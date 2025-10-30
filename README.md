@@ -38,9 +38,16 @@ A common implementation is the **Gilbert Cell Mixer**:
 
 Interestingly, the **axon hillock** in neurons is also **non-linear**, and its ionic current can be expressed as:
 
+### Axon Hillock Ionic Current Equation
+
 \[
-I_t = g_{Na,\text{init}} \, m^3 h (V - E_{Na}) \;+\; g_{K,\text{init}} \, n^4 (V - E_{K}) \;+\; g_{L,\text{init}} (V - E_{L})
+I_t = g_{Na,\text{init}} \, m^3 h \, (V - E_{Na})
+\;+\;
+g_{K,\text{init}} \, n^4 \, (V - E_{K})
+\;+\;
+g_{L,\text{init}} \, (V - E_{L})
 \]
+
 
 This suggests that if two different electrical signals are applied to a neuron, **heterodyning** could theoretically occur — leading to **frequency mixing** in biological systems.
 
