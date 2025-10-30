@@ -1,104 +1,87 @@
 /*
 Frankenhaeuser-Huxley model of myelinated axon
-with parameters from Reilly.
-External diameter is 10 um.
+Parameters derived from Reilly (1998) and Hines & Shrager (1991)
+External fiber diameter: 10 µm
+Author: Arush Sinha
+Date: 2025-10-31
 
-Origin of cell is the 0 node of the first node of Ranvier.
+Notes:
+- Origin of the cell is the 0 node of the first node of Ranvier.
+- Resting potential ≈ -69.77 mV (slightly departs from the canonical -70 mV)
+- Spike threshold for intracellular stimulus at the middle of first node:
+    Adaptive integration: 0.943 nA × 0.1 ms
+    Fixed dt (0.025 ms): 1.015 nA × 0.1 ms
+- Distance between centers of first and last nodes: 100250 µm = 10.025 cm
 
-Note:  Resting potential is close to, but not exactly, -70 mV.
-Actual value is approximately -69.77 mV.
+Conduction velocity:
+- Spike detection threshold: -20 mV
+- Path length: 81201.25 - 21051.25 = 60150 µm
+- Latency and CV:
+    Fixed dt: latency = 3.35 ms → CV = 17.96 m/s
+    Adaptive: latency = 2.652 ms → CV = 22.67 m/s
 
-Spike threshold for intracellular stimulus at middle of first node
-is 0.943 nA x 0.1 ms for adaptive integration 
-and 
-1.015 nA x 0.1 ms for integration with fixed dt = 0.025 ms.
-Distance between centers of first and last nodes is 100250 um = 10.025 cm.
-
-Conduction velocity
-spike detection threshold = -20 mV
-path length = 81201.25 - 21051.25 = 60150 um
-integrator  internode[20](1)  [80](1)   latency   CV
-fixed dt      2.7 ms          6.05 ms   3.35 ms   17960 um/ms = 17.96 mm/ms = 17.96 m/s
-adaptive      2.315 ms        4.967 ms  2.652 ms  22680 um/ms = 22.67 mm/ms = 22.67 m/s
+Model highlights:
+- Illustrates tightly packed myelinated sheath structure.
+- Includes extracellular space, adjustable axial resistances, and realistic node/internode properties.
+- HH dynamics for soma, FH dynamics for nodes.
 */
-//Please note that this model is illustrative of tightly packed myelinated sheath
-NNODES = 5 // # nodes of Ranvier--must be an odd number!
-// NNODES = 5 // # nodes of Ranvier for debugging
-GAP = 2.5e-4 // width of node of Ranvier in cm
-DIAM = 10 // fiber diameter in um including myelin
-SDD = 0.7 // axon diameter is SDD*DIAM
-ELD = 100 // length of internode/fiber diameter
 
-RHOI = 1e4// cytoplasmic resistivity in ohm cm
-// RHOI = 110 // cytoplasmic resistivity in ohm cm (McNeal 1976)
-// note:  Hines and Shrager 1991 agree with McNeal 1976
+NNODES = 5              // Number of nodes of Ranvier (must be odd)
+GAP = 2.5e-4            // Node width in cm
+DIAM = 10               // Fiber diameter including myelin in µm
+SDD = 0.7               // Axon diameter fraction of DIAM
+ELD = 100               // Internode length / fiber diameter
+RHOI = 1e4              // Cytoplasmic resistivity (ohm·cm) per Reilly
+CM = 1.15               // Specific membrane capacitance (µF/cm²)
 
-// RHOE = 300 // extracellular resistivity in ohm cm, now defined in initxstim.hoc
-CM = 1.15 // specific membrane capacitance in uf/cm2
-
-///// topology
+// ---- Topology ----
 create soma
-create node[NNODES], internode[NNODES-1] // node at each end
+create node[NNODES], internode[NNODES-1]
 access node[0]
-connect node[0](0) , soma(1)
+connect node , soma(1)
 for ii=0,NNODES-2 {
-  connect internode[ii](0), node[ii](1)
-  connect node[ii+1](0), internode[ii](1)
+  connect internode , node 
+  connect node , internode 
 }
 
-// topology() // to verify node-internode-node architecture
-
-///// subsets
-
+// ---- Section Lists for convenience ----
 objref all, nodes, internodes
 all = new SectionList()
 nodes = new SectionList()
 internodes = new SectionList()
-forall all.append() // all sections
-forsec "internode" internodes.append() // all internodes
-forsec "node" nodes.append() // all nodes and internodes
-forsec internodes nodes.remove() // now nodes contains only nodes
+forall all.append()
+forsec "internode" internodes.append()
+forsec "node" nodes.append()
+forsec internodes nodes.remove()  // nodes now contains only nodes
 
-/*
-print "NODES:"
-forsec nodes print secname()
-print "INTERNODES:"
-forsec internodes print secname()
-*/
-
-///// geometry
+// ---- Geometry ----
 soma {
   pt3dclear()
-  pt3dadd(0, 0, 0, DIAM)
-  pt3dadd(GAP*1e6, 0, 0, DIAM)
+  pt3dadd(0,0,0, DIAM)
+  pt3dadd(GAP*1e6,0,0, DIAM)
 }
 
 forsec nodes {
-pt3dclear()
-pt3dadd(0,0,0, SDD*DIAM)
-pt3dadd(GAP*1e4,0,0, SDD*DIAM) 
+  pt3dclear()
+  pt3dadd(0,0,0, SDD*DIAM)
+  pt3dadd(GAP*1e4,0,0, SDD*DIAM)
 }
 
 forsec internodes {
-pt3dclear()
-pt3dadd(0,0,0, SDD*DIAM) 
-pt3dadd(ELD*DIAM,0,0, SDD*DIAM) 
+  pt3dclear()
+  pt3dadd(0,0,0, SDD*DIAM)
+  pt3dadd(ELD*DIAM,0,0, SDD*DIAM)
 }
 
-define_shape()  
+define_shape()
 
-// forall Ra = 110 // from Hines and Shrager 1991
-forall Ra = RHOI // Reilly
- 
+forall Ra = RHOI  // Axial resistivity (ohm·cm) per Reilly
 
-PNabar = 8e-3 // cm/s from Hines and Shrager 1991
-PKbar = 1.2e-3
-PPbar = 0.54e-3
-nGm = 0.0303
-// nGm = 0.0304 (table 1 in McNeal 1977
-// but note 0.0303 on p. 336 of McNeal 1977)
-
-// iGm = .0005 // internode membrane conductance--unused here
+// ---- FH Parameters for Nodes ----
+PNabar = 8e-3  // Sodium max permeability (cm/s)
+PKbar = 1.2e-3 // Potassium max permeability (cm/s)
+PPbar = 0.54e-3 // Persistent Na+ permeability (cm/s)
+nGm = 0.0303   // Node membrane conductance (S/cm²)
 
 forsec nodes {
   cm = CM
@@ -111,46 +94,33 @@ forsec nodes {
   nao = 114.5
   ki = 120
   ko = 2.5
-  nseg=3
+  nseg = 3
   insert extracellular
-  xg(0)=1e9
-  xc(0)=1e9
-  xg(1)=1e-3
-  xc(1)=1e-6
-  nseg=3
- xraxial(1)=1e9
- xraxial(0)=2.45e6
+  xg(0)=1e9; xc(0)=1e-6
+  xg(1)=1e-3; xc(1)=1e-6
+  xraxial(0)=2.45e6; xraxial(1)=1e9
 }
 
 forsec internodes {
   insert pas
   insert extracellular
-  g_pas= 1e2
-  cm = CM // unless using extracellular, in which case set it to CM
-  xg(0)=1e2/500
-  xc(0)=CM/500
-  xg(1)=1e-3
-  xc(1)=1e-6
-  nseg=3
-  xraxial(1)=1e9
-  xraxial(0)=125e3
+  g_pas = 1e2
+  cm = CM
+  xg(0)=1e2/500; xc(0)=CM/500
+  xg(1)=1e-3; xc(1)=1e-6
+  nseg = 3
+  xraxial(0)=125e3; xraxial(1)=1e9
 }
 
-soma{
-insert hh
-cm = CM
-nseg=3
+soma {
+  insert hh
+  cm = CM
+  nseg = 3
   insert extracellular
-    xg(0)=1e9
-  xc(0)=1e9
-  xg(1)=1e-3
-  xc(1)=1e-6
- nseg=3
- xraxial(1)=1e9
-
- xraxial(0)=1e9
- e_ext=0
+  xg(0)=1e9; xc(0)=1e9
+  xg(1)=1e-3; xc(1)=1e-6
+  xraxial(0)=1e9; xraxial(1)=1e9
+  e_ext = 0
 }
 
 celsius = 20
-// celsius = 22.03 // 295.18 - 273.15 (McNeal 1977)
