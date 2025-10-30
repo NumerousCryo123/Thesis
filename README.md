@@ -92,7 +92,7 @@ The neuron can be represented as an **electro-chemical integrate-and-fire cell**
 
 ## 🏃 How to Run the Code
 
-1. Open NEURON and load the desired `.hoc` file (e.g., `mosinit.hoc`).  
-2. Use the GUI to **start simulations** and visualize membrane potentials.  
-3. For dual-signal heterodyning experiments, run `axonA.hoc`.  
-4. Analyze results using NEURON tools or export data for **FFT analysis**.  
+1. Download entire codebase to a location on your computer and unzip.
+2. Open command terminal for windows and then cd to the place you have saved.
+3. Run nrnivmodl.
+4. Run mosinit.hoc or nrnguimosinit.hoc
