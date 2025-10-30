@@ -1,59 +1,9 @@
+🧪 Thesis: Modeling Heterodyning Effects in Neurons using NEURON Simulator
 
-Where:
+This code demonstrates how to construct a myelinated neuron model in NEURON that is stimulated by alternating current (AC) sources through both extracellular and intracellular media. ⚡ Heterodyning is a process where two signals of different frequencies are fed into a non-linear electrical component, producing new frequencies — specifically, the sum and difference of the original frequencies. If the input frequencies are f1 and f2, the resulting frequencies are: sum frequency = f1 + f2, difference frequency = |f1 - f2|. This principle is fundamental in telecommunications, allowing frequency translation and communication using smaller antennas. ⚙️ A mixer is a non-linear circuit component that combines two input signals, with a voltage-dependent current–voltage (I–V) relationship. A common implementation is the Gilbert Cell Mixer: 🔗 https://www.researchgate.net/publication/228977791_A_Gilbert_cell_mixer_with_a-digitally-controlled_performance_space.
 
-- `g_Na_init`, `g_K_init`, `g_L_init` = maximal conductances  
-- `m`, `h`, `n` = gating variables  
-- `V` = membrane potential  
-- `E_Na`, `E_K`, `E_L` = reversal potentials  
+Interestingly, the axon hillock in neurons is also non-linear, and its ionic current can be expressed inline as It = g_Na_init * m^3 * h * (V - E_Na) + g_K_init * n^4 * (V - E_K) + g_L_init * (V - E_L), where g_Na_init, g_K_init, g_L_init are maximal conductances, m, h, n are gating variables, V is the membrane potential, and E_Na, E_K, E_L are reversal potentials. This suggests that applying two different electrical signals to a neuron could produce heterodyned frequencies.
 
-This suggests that applying two different electrical signals to a neuron could produce **heterodyned frequencies**.
+The NEURON model simulates a myelinated axon, applies two AC signals (intracellular + extracellular), and observes whether heterodyned frequency components appear in the membrane potential. 🧬 Neuron Heterodyning Model Diagram: ![](https://github.com/user-attachments/assets/139307e5-e0e9-41fb-8343-7644806e2f3d) | Electronic Circuit Representation of Neuron: ![](https://github.com/user-attachments/assets/26c28683-59fb-49e2-8f4b-3da9f7938f92).
 
----
-
-## 🧪 Model Objective
-
-The NEURON model:
-
-1. Simulates a **myelinated axon**.  
-2. Applies **two AC signals** (intracellular + extracellular).  
-3. Observes whether **heterodyned frequency components** appear in the membrane potential.
-
----
-
-## 📷 Figures
-
-**Neuron Heterodyning Model Diagram**  
-
-![](https://github.com/user-attachments/assets/139307e5-e0e9-41fb-8343-7644806e2f3d)  
-
-**Electronic Circuit Representation of Neuron**  
-
-![](https://github.com/user-attachments/assets/26c28683-59fb-49e2-8f4b-3da9f7938f92)
-
----
-
-## 💻 Implementation Notes
-
-The neuron can be represented as an **electro-chemical integrate-and-fire cell**, analogous to an **RC electronic circuit**. Resistance and capacitance naturally emerge in the model.
-
----
-
-## 🗂 Work Done in the Files
-
-| File           | Purpose |
-|----------------|---------|
-| `axonB10.hoc`  | Constructs a myelinated CNS neuron stimulated **exogenously** by a sinusoidal wave and **endogenously**. |
-| `axonB5.hoc`   | Stimulates the neuron **endogenously**. |
-| `axonA.hoc`    | Stimulates the neuron with **two exogenous waves**. |
-| `mosinit.hoc`  | Launches a **GUI** to visualize results. |
-
----
-
-## 🏃 How to Run the Code
-
-1. Open NEURON and load the desired `.hoc` file (e.g., `mosinit.hoc`).  
-2. Use the GUI to **start simulations** and visualize membrane potentials.  
-3. For dual-signal heterodyning experiments, run `axonA.hoc`.  
-4. Optionally, export data for **FFT analysis** to observe heterodyned frequencies.
-
-*This workflow bridges neuroscience and communication theory, showing how non-linear biological components can mimic engineered signal mixers.*
+The neuron can be represented as an electro-chemical integrate-and-fire cell, analogous to an RC electronic circuit, where resistance and capacitance naturally emerge. 🗂 Work done in the files: axonB10.hoc constructs a myelinated CNS neuron stimulated exogenously and endogenously; axonB5.hoc stimulates the neuron endogenously; axonA.hoc stimulates the neuron with two exogenous waves; mosinit.hoc launches a GUI to visualize results. 🏃 How to run the code: open NEURON and load the desired .hoc file (e.g., mosinit.hoc), use the GUI to start simulations and visualize membrane potentials, for dual-signal heterodyning experiments run axonA.hoc, and optionally export data for FFT analysis to observe heterodyned frequencies. This workflow bridges neuroscience and communication theory, showing how non-linear biological components can mimic engineered signal mixers.
