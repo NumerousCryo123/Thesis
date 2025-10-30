@@ -1,0 +1,122 @@
+
+/*
+Ok, so Assaf, basis your advice I decided to start small just passive channel with axon myelinated- internode and node
+*/
+load_file("nrngui.hoc")
+NNODES = 5 // # nodes of Ranvier--must be an odd number!
+// NNODES = 5 // # nodes of Ranvier for debugging
+GAP = 2.5e-4 // width of node of Ranvier in cm
+DIAM = 10 // fiber diameter in um including myelin
+SDD = 0.7 // axon diameter is SDD*DIAM
+ELD = 100 // length of internode/fiber diameter
+RHOI = 100 // cytoplasmic resistivity in ohm cm, keep it very low, so basically short circuit it.
+CM = 2 // specific membrane capacitance in uf/cm2
+
+///// topology
+
+create node[NNODES], internode[NNODES-1] // node at each end
+access node[0]
+
+for ii=0,NNODES-2 {
+  connect internode[ii](0), node[ii](1)
+  connect node[ii+1](0), internode[ii](1)
+}
+
+// topology() // to verify node-internode-node architecture
+
+///// subsets
+
+objref all, nodes, internodes
+all = new SectionList()
+nodes = new SectionList()
+internodes = new SectionList()
+forall all.append() // all sections
+forsec "internode" internodes.append() // all internodes
+forsec "node" nodes.append() // all nodes and internodes
+forsec internodes nodes.remove() // now nodes contains only nodes
+forsec nodes {
+pt3dclear()
+pt3dadd(0,0,0, SDD*DIAM)
+pt3dadd(GAP*1e4,0,0, SDD*DIAM) 
+}
+forsec internodes {
+pt3dclear()
+pt3dadd(0,0,0, SDD*DIAM) 
+pt3dadd(ELD*DIAM,0,0, SDD*DIAM) 
+}
+define_shape()  
+topology()
+v_init = -70 // from ModelDB entry 3507
+forall{
+insert pas
+Ra=RHOI
+secondorder = 0
+celsius = 20
+insert pas e_pas = v_init
+insert extracellular
+}
+
+
+forsec internodes {
+nseg=3
+insert xtra
+Rmyelin_DC = 1e7
+g_pas = (1/(Rmyelin_DC))*50
+cm = CM
+xraxial[0] = 1e-9
+xraxial[1]= 1e-9
+xg[0]=  1/(Rmyelin_DC)
+xc[0] = CM/50
+xg[1] =1e9  
+xc[1]=0
+ 
+}
+
+
+PNabar = 8e-3 // cm/s from Hines and Shrager 1991
+PKbar = 1.2e-3
+PPbar = 0.54e-3
+nGm = 0.0303
+ 
+ /*
+forsec nodes {
+  nseg=1
+  cm = CM
+  insert fh
+  pnabar_fh = PNabar
+  pkbar_fh = PKbar
+  ppbar_fh = PPbar
+  gl_fh = nGm
+  nai = 13.74
+  nao = 114.5
+  ki = 120
+  ko = 2.5
+ xg[0] =1e-9/1e9
+ xg[1] =1e9
+ xc[1]=1e-9/1e9
+ xc[0]=1e-9/1e9
+ xraxial[0] = 1e-9
+ xraxial[1] = 1e-9
+ cm = 1e-4
+ Rmyelin_DC = 1e7
+ g_pas = 1e4 	
+ }
+celsius = 20
+
+*/
+forsec nodes {
+nseg=3
+insert xtra
+xg[0] =1e9/1e-9
+xg[1] =1e9
+xc[1]=1e-9/1e9
+xc[0]=1e-9/1e9
+xraxial[0] = 1e-9
+xraxial[1] = 1e-9
+cm = 1e-9
+Rmyelin_DC = 1e7
+g_pas = 1e9/1e-9
+ }
+celsius = 20 
+
+

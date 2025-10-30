@@ -1,0 +1,27 @@
+load_file("nrngui.hoc")
+load_file("Neuron_Class.hoc")
+
+objref axon
+axon = new MyelinatedAxon()
+
+// Stimulate the middle node
+objref stim
+stim = new IClamp(axon.node[2](0.5))
+stim.del = 1
+stim.dur = 0.1
+stim.amp = 1 // nA
+
+// Record voltage
+objref vrec, trec
+vrec = new Vector()
+trec = new Vector()
+vrec.record(&axon.node[2].v(0.5))
+trec.record(&t)
+
+// Run
+tstop = 5
+run()
+
+// Plot
+graphItem = new Graph()
+vrec.line(graphItem, trec)

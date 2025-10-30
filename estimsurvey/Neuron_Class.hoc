@@ -1,0 +1,166 @@
+//=============================================================
+// Frankenhaeuser-Huxley Myelinated Axon Model (Reilly Parameters)
+// Fully Corrected Template with Extracellular Support
+//=============================================================
+
+begintemplate Neuron_Class
+
+public soma, nodes, internodes, all, stim, connect_to, init
+
+objref soma, nodes, internodes, all, stim
+
+proc init() {
+    local i
+    //============================
+    // === Parameters ===
+    //============================
+    NNODES = 5               // must be odd
+    GAP = 2.5e-4             // cm (width of node)
+    DIAM = 10                // µm (outer diameter including myelin)
+    SDD = 0.7                // axon diameter ratio
+    ELD = 100                // length of internode / fiber diameter
+    RHOI = 1e4               // cytoplasmic resistivity (ohm·cm)
+    CM = 1.15                // µF/cm²
+
+    PNabar = 8e-3            // cm/s
+    PKbar = 1.2e-3
+    PPbar = 0.54e-3
+    nGm = 0.0303             // node membrane conductance (S/cm²)
+    celsius = 20             // temperature (°C)
+
+    //============================
+    // === Create Sections ===
+    //============================
+    create soma
+    create nodes[NNODES]
+    create internodes[NNODES-1]
+
+    //============================
+    // === Connect Sections ===
+    //============================
+    connect nodes , soma(1)
+    for i = 0, NNODES-2 {
+        connect internodes , nodes 
+        connect nodes , internodes 
+    }
+
+    //============================
+    // === Section Lists ===
+    //============================
+    all = new SectionList()
+    forall all.append()
+
+    nodes = new SectionList()
+    forsec "nodes" nodes.append()
+
+    internodes = new SectionList()
+    forsec "internodes" internodes.append()
+
+    //============================
+    // === Geometry ===
+    //============================
+    soma {
+        pt3dclear()
+        pt3dadd(0, 0, 0, DIAM)
+        pt3dadd(GAP * 1e4, 0, 0, DIAM)
+    }
+
+    forsec nodes {
+        pt3dclear()
+        pt3dadd(0, 0, 0, SDD * DIAM)
+        pt3dadd(GAP * 1e4, 0, 0, SDD * DIAM)
+    }
+
+    forsec internodes {
+        pt3dclear()
+        pt3dadd(0, 0, 0, SDD * DIAM)
+        pt3dadd(ELD * DIAM, 0, 0, SDD * DIAM)
+    }
+
+    define_shape()
+
+    //============================
+    // === Axial Resistivity ===
+    //============================
+    forall Ra = RHOI
+
+    //============================
+    // === Node Biophysics ===
+    //============================
+    forsec nodes {
+        cm = CM
+        insert fh
+        pnabar_fh = PNabar
+        pkbar_fh = PKbar
+        ppbar_fh = PPbar
+        gl_fh = nGm
+        nai = 13.74
+        nao = 114.5
+        ki = 120
+        ko = 2.5
+        nseg = 3
+        insert extracellular
+        xg(0) = 1e9
+        xc(0) = 1e9
+        xg(1) = 1e-3
+        xc(1) = 1e-6
+        xraxial(1) = 1e9
+        xraxial(0) = 2.45e6
+    }
+
+    //============================
+    // === Internode Biophysics ===
+    //============================
+    forsec internodes {
+        insert pas
+        insert extracellular
+        g_pas = 1e-2
+        cm = CM / 500
+        xg(0) = 1e2 / 500
+        xc(0) = CM / 500
+        xg(1) = 1e-3
+        xc(1) = 1e-6
+        nseg = 3
+        xraxial(1) = 1e9
+        xraxial(0) = 125e3
+    }
+
+    //============================
+    // === Soma Biophysics ===
+    //============================
+    soma {
+        insert hh
+        cm = CM
+        nseg = 3
+        insert extracellular
+        xg(0) = 1e9
+        xc(0) = 1e9
+        xg(1) = 1e-3
+        xc(1) = 1e-6
+        xraxial(1) = 1e9
+        xraxial(0) = 1e9
+        e_ext = 0
+    }
+
+    //============================
+    // === Default Stimulus ===
+    //============================
+    soma stim = new IClamp(0.5)
+    stim.del = 1
+    stim.dur = 1
+    stim.amp = 0.5
+}
+
+//=============================================================
+// Optional: connect to another axon (chain simulation)
+//=============================================================
+proc connect_to() { local xloc
+    // Usage: objref a1, a2
+    //         a1 = new MyelinatedAxon()
+    //         a2 = new MyelinatedAxon()
+    //         a2.connect_to(a1)
+    xloc = $1
+    connect soma(0), xloc(1)
+}
+
+endtemplate 

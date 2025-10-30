@@ -1,0 +1,74 @@
+// === Load NEURON libraries ===
+load_file("axon10.hoc")
+load_file("basicrig.ses")
+load_file("stdlib.hoc")
+load_file("stdrun.hoc")
+
+// === Simulation parameters ===
+v_init = -70
+tstop = 10000   // ms
+dt = 0.025
+
+// === Synapse for demonstration (optional) ===
+objref syn_soma
+soma syn_soma = new ExpSyn(0.5)
+syn_soma.tau = 5
+syn_soma.e = 0
+
+// === IClamp to inject current ===
+objref stim
+soma stim = new IClamp(0.5)
+stim.del = 0
+stim.dur = tstop
+stim.amp = 0
+
+// === Time vector ===
+objref tvec
+tvec = new Vector()
+tvec.indgen(0, tstop, dt)
+
+// === Sine wave currents ===
+objref I1, I2, Itotal
+I1 = new Vector(tvec.size())
+I2 = new Vector(tvec.size())
+Itotal = new Vector(tvec.size())
+
+f1 = 5      // Hz
+f2 = 9     // Hz
+A1 = 0.1    // nA
+A2 = 0.1   // nA
+
+for i=0, tvec.size()-1 {
+    t = tvec.x(i)/1000.0   // convert ms to s
+    I1.x(i) = A1 * sin(2*3.14159*f1*t)
+    I2.x(i) = A2 * sin(2*3.14159*f2*t)
+    Itotal.x(i) = I1.x(i) + I2.x(i)
+}
+
+// === Play combined sine wave into IClamp ===
+Itotal.play(&stim.amp, tvec)
+
+// === Optional: NetCon driving synapse ===
+objref nc
+nc = new NetCon(stim, syn_soma)
+nc.weight = 0.005
+nc.delay = 0
+
+// === Record soma voltage ===
+objref vvec
+vvec = new Vector()
+vvec.record(&soma.v(0.5))
+
+// === Run simulation ===
+run()
+
+// === Plot soma voltage ===
+objref g
+g = new Graph()
+g.size(0, tstop, -80, 40)
+g.view(0, -80, tstop, 120, 0, 0, 600, 300)
+g.label("Soma Vm: 5 Hz + 10 Hz sine wave current")
+g.beginline()
+for i=0, tvec.size()-1 {
+    g.line(tvec.x(i), vvec.x(i))
+}

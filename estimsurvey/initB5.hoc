@@ -1,0 +1,48 @@
+load_file("axon10.hoc")
+load_file("basicrig.ses")
+load_file("stdlib.hoc")
+load_file("vvsx.ses")
+
+// Simulation parameters
+tstop = 10000
+dt = 0.025
+
+steps = tstop / dt
+
+// -------- Two close-frequency sine waves --------
+objref tvec, eval
+tvec = new Vector()
+eval = new Vector()
+
+A1 = 5       // amplitude [mV]
+f1 = 5000// frequency [Hz]
+
+A2 = 5       // amplitude [mV]
+f2 = 5003// frequency [Hz]
+
+for i = 0, steps-1 {
+    t = i * dt
+    tvec.append(t)
+
+    v1 = 5*sin(2 * PI * f1 * t / 1000)   // first sine
+    v2 = 5*sin(2 * PI * f2 * t / 1000)   // second sine
+    eval.append(v1 + v2)                     // sum
+}
+
+// Play combined waveform into extracellular at soma(0.5)
+eval.play(&soma.e_extracellular(0.5), tvec, 1)
+
+// -------- Graph the applied signal --------
+objref g
+g = new Graph()
+g.size(0, tstop, -(A1+A2), (A1+A2))
+g.view(0, -(A1+A2), tstop, 2*(A1+A2), 0, 0, 600, 300)
+g.label("Two Sine Waves (5000 Hz + 5010 Hz) into e_extracellular at soma(0.5)")
+
+g.beginline()
+for i = 0, tvec.size()-1 {
+    g.line(tvec.x(i), eval.x(i))
+}
+
+// Run
+run()

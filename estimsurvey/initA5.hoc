@@ -1,0 +1,36 @@
+load_file("axon10.hoc")
+load_file("modified_basicrig.ses")
+load_file("stdlib.hoc")
+load_file("vvsx.ses")
+
+// Set simulation parameters
+v_init = -69.77
+tstop = 1000000000
+dt = 0.025
+
+
+// Create 2 Hz synapse at soma(0.5)
+objref syn2hz
+node[0]syn2hz = new ExpSyn(0.5)
+syn2hz.tau = 100
+syn2hz.e = 0
+
+// Create 2 Hz NetStim
+objref stim2hz
+stim2hz = new NetStim()
+stim2hz.start = 0
+stim2hz.number = 30       // Number of spikes
+stim2hz.interval = 1000/3  // 2 Hz = 500 ms
+stim2hz.noise = 0
+
+// Connect NetStim to synapse
+objref nc2hz
+nc2hz = new NetCon(stim2hz, syn2hz)
+nc2hz.weight =100* 0.0005
+nc2hz.delay = 0
+
+
+
+// Run
+
+run()

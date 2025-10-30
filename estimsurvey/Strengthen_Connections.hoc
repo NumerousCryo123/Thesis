@@ -1,0 +1,83 @@
+// === Load NEURON libraries and model ===
+load_file("axon10.hoc")
+load_file("stdrun.hoc")
+load_file("basicrig.ses")
+load_file("stdlib.hoc")
+// === Simulation parameters ===
+v_init = -70
+tstop = 1000   // ms
+dt = 0.025
+
+// === Synapses ===
+objref syn_soma
+soma syn_soma = new ExpSyn(0.5)
+syn_soma.tau = 5
+syn_soma.e = 0
+
+objref syn_node0
+node[0] syn_node0 = new ExpSyn(0.5)
+syn_node0.tau = 5
+syn_node0.e = 0
+
+// === Spike generators (NetStim) ===
+objref stim_soma, stim_node0
+stim_soma = new NetStim()
+stim_soma.start = 0
+stim_soma.number = 1000
+stim_soma.interval = 100     // 10 Hz
+stim_soma.noise = 1          // stochastic
+
+stim_node0 = new NetStim()
+stim_node0.start = 0
+stim_node0.number = 1000
+stim_node0.interval = 50     // 20 Hz
+stim_node0.noise = 1
+
+// === NetCon connections ===
+objref nc_soma, nc_node0
+nc_soma = new NetCon(stim_soma, syn_soma)
+nc_soma.weight = 0
+nc_soma.delay = 1
+
+nc_node0 = new NetCon(stim_node0, syn_node0)
+nc_node0.weight = 0.005
+nc_node0.delay = 1
+
+// === Function to strengthen weights based on spike frequency ===
+proc strengthen_weights() {
+    nc_soma.weight = nc_soma.weight * (1 + 10/1000)
+    nc_node0.weight = nc_node0.weight * (1 + 20/1000)
+    print "Updated weights: soma=", nc_soma.weight, " node0=", nc_node0.weight
+}
+
+// === Record voltages ===
+objref v_soma, v_node0, tvec
+v_soma = new Vector()
+v_node0 = new Vector()
+tvec = new Vector()
+v_soma.record(&soma.v(0.5))
+v_node0.record(&node[0].v(0.5))
+tvec.record(&t)
+
+// === Run simulation ===
+stdinit()
+run()
+
+// === Plot voltages ===
+objref g
+g = new Graph()
+g.size(0, tstop, -80, 40)
+g.view(0, -80, tstop, 120, 0, 0, 600, 300)
+g.label("Soma and Node[0] Vm")
+g.beginline()
+for i=0, tvec.size()-1 {
+    g.line(tvec.x(i), v_soma.x(i))
+}
+g.color(2)
+for i=0, tvec.size()-1 {
+    g.line(tvec.x(i), v_node0.x(i))
+}
+
+// === Example: strengthen weights based on spike frequency ===
+strengthen_weights(10)  // e.g., 10 Hz
+strengthen_weights(20)  // e.g., 20 Hz

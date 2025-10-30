@@ -1,0 +1,11 @@
+load_file("nrngui.hoc")
+
+xpanel("Running Code")  
+  xbutton("Endogenous only","load_file(\"initA.hoc\")")
+  xbutton("Exogenous only","load_file(\"initB5.hoc\")")
+  xbutton("Endogenous and exogenous","load_file(\"initB10.hoc\")")
+  xbutton("Node of Ranvier","load_file(\"Node.hoc\")")
+xbutton("Strenghten Connections","load_file(\"Strengthen_Connections.hoc\")")
+xbutton("Class","load_file(\"THISFILE.hoc\")")
+  xbutton("Quit to run another case", "quit()")
+xpanel()

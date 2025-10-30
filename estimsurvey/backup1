@@ -1,0 +1,164 @@
+/*
+// === Load GUI and your axon model structure ===
+load_file("nrngui.hoc")
+load_file("axon10.hoc")  // assumes this file creates the axon structure
+
+// === Simulation parameters ===
+stim_start = 0     // ms
+stim_end   = 10   // ms
+stim_amp  = -50    // mV extracellular voltage pulse at node[0]
+tstop     = 30      // ms
+dt        = 0.025
+v_init    = -70    // mV
+
+// === Recording setup ===
+objref tvec, vvec
+tvec = new Vector()
+vvec = new Vector()
+tvec.record(&t)
+vvec.record(&internode[2].v(0.5))  // record voltage at middle of internode[2]
+
+// === Initialize membrane potential ===
+finitialize(v_init)
+
+// === Manual stimulation loop (uses e_extracellular) ===
+while (t < tstop) {
+    if (t >= stim_start && t <= stim_end) {
+        node[0].e_extracellular(0.5) = stim_amp  // apply extracellular voltage
+    } else {
+        node[0].e_extracellular(0.5) = 0  // reset to ground
+    }
+    fadvance()
+}
+
+// === Plot the results ===
+objref g
+g = new Graph()
+g.size(0, tstop, -90, 40)  // adjust Y range if needed
+vvec.line(g, tvec, 1, 1)
+g.label(0.1, 0.9, "internode[2] membrane voltage")
+*/
+/*Code to try and stimulate the thing extracellularly- not working*/
+/*
+// === Load GUI and model ===
+load_file("nrngui.hoc")
+load_file("axon10.hoc")
+
+// === Simulation setup ===
+stim_start = 0  // ms
+stim_end = 10   // ms
+stim_amp = 100  // mV applied extracellularly
+dt = 0.025
+tstop = 12
+
+
+// === Recording vectors ===
+objref tvec, v_node2, v_internode2
+tvec = new Vector()
+v_node2 = new Vector()
+v_internode2 = new Vector()
+
+access node[1] // Required before recording time
+
+tvec.record(&t)
+v_node2.record(&node[2].v(0.5))           // Membrane voltage at node[2]
+v_internode2.record(&internode[1].v(0.5)) // Membrane voltage at internode[2]
+
+// === Run simulation with extracellular stimulation ===
+finitialize(v_init)
+while (t < tstop) {
+    if (t >= stim_start && t <= stim_end) {
+        node[1].e_extracellular(0.5) = stim_amp
+    } else {
+        node[1].e_extracellular(0.5) = 0
+    }
+    fadvance()
+}
+
+// === Plot results ===
+objref graph1, graph2
+
+graph1 = new Graph()
+graph1.size(0, tstop, -80, 50)
+v_node2.plot(graph1, tvec)
+graph1.label(0.2, 0.9, "Vm at node[1]")
+
+graph2 = new Graph()
+graph2.size(0, tstop, -80, 50)
+v_internode2.plot(graph2, tvec)
+graph2.label(0.2, 0.9, "Vm at internode[0]")*/
+// Load GUI and your axon model code
+load_file("nrngui.hoc")
+load_file("axon10.hoc")  // your axon model with nodes, internodes, and xtra inserted
+
+// Simulation parameters
+tstop = 5    // ms, total simulation time
+dt = 0.025   // ms, time step
+
+// Stimulus parameters
+stim_dur = 3   // duration of stimulus in ms
+stim_amp = 0.1   // stimulus current in nA (set a small value, adjust if needed)
+
+// Setup extracellular stimulus vector
+objref stimvec, timevec
+stimvec = new Vector()
+timevec = new Vector()
+
+// Create stimulus: current pulse at t=0 of duration stim_dur, amplitude stim_amp
+timevec.play("t", 0)
+stimvec.play("is", 0)  // initialize to 0
+
+// Actually fill stimvec and timevec for the pulse
+timevec.clear()
+stimvec.clear()
+timevec.resize(2)
+stimvec.resize(2)
+timevec.x[0] = 0
+timevec.x[1] = stim_dur
+stimvec.x[0] = stim_amp  // stimulus current nA at time 0s
+stimvec.x[1] = 0        // back to zero after stim_dur
+
+// Play stimvec into global variable 'is' defined in xtra.mod
+stimvec.play(&xtra.is, timevec)
+
+// Connect pointers for extracellular mechanism
+// This assumes 'xtra' is inserted in all nodes and internodes sections
+// You must connect im and ex pointers manually for each section and segment
+
+// Connect xtra pointers for all sections and all segments
+forall {
+  for (x, 0) {
+    // Connect xtra's 'im' to extracellular i_membrane
+    xtra.im = &i_membrane(x)
+    // Connect extracellular e_extracellular to xtra's ex
+    e_extracellular(x) = xtra.ex
+  }
+}
+
+// Record vectors for plotting
+objref v_rec_node0, v_rec_node_end, tvec
+v_rec_node0 = new Vector()
+v_rec_node_end = new Vector()
+tvec = new Vector()
+
+access node[0]
+v_rec_node0.record(&v(0.5))
+access node[NNODES-1]
+v_rec_node_end.record(&v(0.5))
+tvec.record(&t)
+
+// Initialize and run simulation
+v_init = -70
+init()
+run()
+
+// Plot results
+objref graph
+graph = new Graph()
+graph.size(0, tstop, -80, 40)
+graph.addvar("Node0", &v_rec_node0, 1, 0, 1)
+graph.addvar("NodeEnd", &v_rec_node_end, 2, 1, 0)
+graph.label(0.5, 40, "Membrane Potential (mV)")
+graph.exec_menu("View = plot")
+
+

@@ -1,0 +1,60 @@
+load_file("axon10.hoc")
+load_file("basicrig.ses")
+load_file("stdlib.hoc")
+load_file("vvsx.ses")
+
+// Set simulation parameters
+v_init = -69.77
+tstop = 10000
+dt = 0.025
+
+
+// Create 2 Hz synapse at soma(0.5)
+objref syn2hz
+soma syn2hz = new ExpSyn(0.5)
+syn2hz.tau = 100
+syn2hz.e = 0
+
+// Create 2 Hz NetStim
+objref stim2hz
+stim2hz = new NetStim()
+stim2hz.start = 0
+stim2hz.number = 20        // Number of spikes
+stim2hz.interval = 1000/2  // 2 Hz = 500 ms
+stim2hz.noise = 0
+
+// Connect NetStim to synapse
+objref nc2hz
+nc2hz = new NetCon(stim2hz, syn2hz)
+nc2hz.weight = 0.0005
+nc2hz.delay = 0
+
+
+// Create vectors
+objref tvec, eval
+tvec = new Vector()
+eval = new Vector()
+A=5
+f=1501
+steps = tstop / dt
+for i = 0, steps-1 {
+    t = i * dt
+    tvec.append(t)
+    eval.append(A * sin(2 * PI * f * t / 1000))  // convert t to seconds
+}
+
+// Inject into extracellular field
+eval.play(&soma.e_extracellular(0.5), tvec, 1)
+objref g
+g = new Graph()
+g.size(0, tstop, -A, A)
+g.view(0, -A, tstop, 2*A, 0, 0, 600, 300)
+g.label("100 Hz Sine Wave into e_extracellular")
+
+g.beginline()
+for i = 0, tvec.size()-1 {
+    g.line(tvec.x(i), eval.x(i))
+}
+// Run
+
+run()

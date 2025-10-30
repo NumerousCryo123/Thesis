@@ -1,0 +1,184 @@
+// === Load NEURON libraries ===
+load_file("axon10.hoc")
+load_file("basicrig.ses")
+load_file("stdlib.hoc")
+load_file("stdrun.hoc")
+
+// === Simulation parameters ===
+v_init = -70
+tstop = 1000   // ms
+dt = 0.025
+
+// === Synapse for demonstration ===
+objref syn_soma
+soma syn_soma = new ExpSyn(0.5)
+syn_soma.tau = 5
+syn_soma.e = 0
+
+// === IClamp 1: 5 Hz ===
+objref stim5
+soma stim5 = new IClamp(0.5)
+stim5.del = 0
+stim5.dur = tstop
+stim5.amp = 0
+
+// === IClamp 2: 10 Hz ===
+objref stim10
+soma stim10 = new IClamp(0.5)
+stim10.del = 0
+stim10.dur = tstop
+stim10.amp = 0
+
+// === Spike waveforms via play() ===
+objref tvec, v5, v10
+tvec = new Vector()
+tvec.indgen(0, tstop, dt)
+
+v5 = new Vector(tvec.size())
+v10 = new Vector(tvec.size())
+
+// Periods
+p5 = 1000/5   // ms per spike
+p10 = 1000/10 // ms per spike
+pulse = 2     // ms spike width
+vspike = 0.5  // nA current amplitude
+
+for i=0, tvec.size()-1 {
+    t = tvec.x(i)
+    
+    if ( (t % p5) < pulse ) {
+        v5.x(i) = vspike
+    } else {
+        v5.x(i) = 0
+    }
+    
+    if ( (t % p10) < pulse ) {
+        v10.x(i) = vspike
+    } else {
+        v10.x(i) = 0
+    }
+}
+
+// Play into the IClamps
+v5.play(&stim5.amp, tvec)
+v10.play(&stim10.amp, tvec)
+
+// === NetCon driving the synapse ===
+objref nc5, nc10
+nc5 = new NetCon(stim5, syn_soma)
+nc5.weight = 0.005
+nc5.delay = 0
+
+nc10 = new NetCon(stim10, syn_soma)
+nc10.weight = 0.005
+nc10.delay = 0
+
+// === Record soma voltage ===
+objref vvec
+vvec = new Vector()
+vvec.record(&soma.v(0.5))
+
+// === Run simulation ===
+run()
+
+// === Plot voltage ===
+objref g
+g = new Graph()
+g.size(0, tstop, -80, 40)
+g.view(0, -80, tstop, 120, 0, 0, 600, 300)
+g.label("Soma Vm: 5 Hz + 10 Hz stimulation")
+g.beginline()
+for i=0, tvec.size()-1 {
+    g.li
+/*
+
+load_file("axon10.hoc")
+load_file("basicrig.ses")
+load_file("stdlib.hoc")
+load_file("vvsx.ses")
+
+// ---------------- Simulation parameters ----------------
+v_init = -69.77
+tstop = 10000  // ms
+dt = 0.025
+
+// ---------------- Spike waveform parameters ----------------
+vspike = 20
+vbase = -70
+pulse_dur = 2  // ms
+
+// ---------------- Time vector ----------------
+objref tvec
+tvec = new Vector()
+tvec.indgen(0, tstop, dt)
+
+// ---------------- Waveform vectors ----------------
+objref v7, v2
+v7 = new Vector(tvec.size())
+v2 = new Vector(tvec.size())
+
+period7 = 1000/7    // ~142.857 ms
+period2 = 1000/200     // ms
+
+for i=0, tvec.size()-1 {
+    t = tvec.x(i)
+
+    // 7 Hz spike
+    if ((t % period7) < pulse_dur) {
+        v7.x(i) = vspike
+    } else {
+        v7.x(i) = vbase
+    }
+
+    // 2 Hz spike
+    if ((t % period2) < pulse_dur) {
+        v2.x(i) = vspike
+    } else {
+        v2.x(i) = vbase
+    }
+}
+
+// ---------------- Combine both into one waveform ----------------
+objref vtotal
+vtotal = new Vector(tvec.size())
+vtotal.copy(v7)
+vtotal.add(v2)
+vtotal.div(2)  // average amplitude
+
+// ---------------- Synapse at soma ----------------
+objref syn_soma
+soma syn_soma = new ExpSyn(0.5)
+syn_soma.tau = 5
+syn_soma.e = 0
+
+// ---------------- Dummy IClamp to play waveform ----------------
+objref stim
+soma stim = new IClamp(0.5)   // attach IClamp to soma midpoint
+stim.del = 0                  // start immediately
+stim.dur = tstop
+stim.amp = 0
+
+// Play the vtotal vector into the IClamp amplitude using tvec
+vtotal.play(&stim.amp, tvec)
+
+// ---------------- NetCon driving the synapse ----------------
+objref nc5khz
+nc5khz = new NetCon(stim, syn_soma)
+nc5khz.weight = 0.005
+nc5khz.delay = 0
+
+// ---------------- Record soma Vm ----------------
+objref vvec
+vvec = new Vector()
+vvec.record(&soma.v(0.5))
+
+// ---------------- Plot the input waveform ----------------
+objref g
+g = new Graph()
+g.size(0, tstop, -80, 40)
+g.view(0, -80, tstop, 120, 0, 0, 600, 300)
+g.label("Spike waveforms: 7 Hz + 2 Hz")
+g.beginline()
+for i=0, tvec.size()-1 {
+    g.line(tvec.x(i), vtotal.x(i))
+}*/

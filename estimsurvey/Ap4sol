@@ -1,0 +1,58 @@
+load_file("nrngui.hoc")
+load_file("axon10.hoc")  // Load axon with nodes[] and internodes[] defined
+
+// Assign increasing conductance values to xg[1]
+node[0] { xg[1] = 1e-9 }
+internode[0] { xg[1] = 1e-9 }
+
+node[1] { xg[1] = 1e-6 }
+internode[1] { xg[1] = 1e-6 }
+
+node[2] { xg[1] = 1e-4 }
+internode[2] { xg[1] = 1e-4 }
+
+node[3] { xg[1] = 1e-2 }
+internode[3] { xg[1] = 1e-2 }
+
+node[4] { xg[1] = 1e-2 }
+
+// Optional: print all section names
+forall print secname()
+
+// Attach SEClamp to node[0] using section prefix style
+objref src
+node[0] src = new SEClamp(0.5)
+src.dur1 = 1e9      // effectively constant voltage
+src.amp1 = -0.02    // -20 mV
+src.rs = 0.01       // almost ideal clamp
+
+// Prepare recording vectors
+objref tvec, v_node3, v_internode3, v_node4
+tvec = new Vector()
+tvec.record(&t)
+
+node[3] v_node3 = new Vector()
+v_node3.record(&v(0.5))
+
+internode[3] v_internode3 = new Vector()
+v_internode3.record(&v(0.5))
+
+node[4] v_node4 = new Vector()
+v_node4.record(&v(0.5))
+
+// Run simulation
+tstop = 10
+run()
+
+// Plot results
+objref g
+g = new Graph()
+g.size(0, tstop, -0.1, 0.05)
+
+g.addvar("node[3](0.5).v", v_node3, 1, 1)
+g.addvar("internode[3](0.5).v", v_internode3, 2, 1)
+g.addvar("node[4](0.5).v", v_node4, 3, 1)
+
+g.exec_menu("View = plot")
+
+
