@@ -57,13 +57,9 @@ To test this hypothesis, the NEURON model:
 
 ---
 
-### 📷 Figure
-
-<div align="center">
-  <img src="https://github.com/user-attachments/assets/139307e5-e0e9-41fb-8343-7644806e2f3d" width="350" alt="Neuron heterodyning model diagram">
-</div>
-
 ---
+# Structure of a neuron 
+<img width="262" height="193" alt="image" src="https://github.com/user-attachments/assets/16ca466a-aad6-4b1d-bbee-22480ade4ea6" />
 
 ### 💻 Implementation Notes
 
