@@ -82,8 +82,8 @@ The neuron can be represented as an **electro-chemical integrate-and-fire cell**
 | File            | Purpose |
 |-----------------|---------|
 | `axonB10.hoc`   | Constructs a myelinated CNS neuron stimulated **exogenously** by a sinusoidal wave and **endogenously**. |
-| `axonB5.hoc`    | Stimulates the neuron **endogenously**. |
-| `axonA.hoc`     | Stimulates the neuron with **two exogenous waves** simultaneously. |
+| `axonB5.hoc`    | Stimulates the neuron **with two   endogneously applied** sine waves. |
+| `axonA.hoc`     | Stimulates the neuron with **two exogenously applied  waves** simultaneously. |
 | `mosinit.hoc`   | Launches a **GUI** to visualize results. |
 
 ---
