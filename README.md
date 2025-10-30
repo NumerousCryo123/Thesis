@@ -55,23 +55,42 @@ To test this hypothesis, the NEURON model:
 - Observes whether **heterodyned frequency components** appear in the resulting membrane potential.
 
 ---
+---
 
-### 📷 Figure
+## 📷 Figures
+
+**Neuron Heterodyning Model Diagram**  
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/139307e5-e0e9-41fb-8343-7644806e2f3d" width="350" alt="Neuron heterodyning model diagram">
 </div>
 
----
+**Electronic Circuit Representation of Neuron**  
 
-### 💻 Implementation Notes
-
-The NEURON simulation uses:
-
-- Hodgkin–Huxley style ion channel equations.  
-- Custom extracellular field stimulation.  
-- FFT analysis to detect mixed-frequency components.
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/26c28683-59fb-49e2-8f4b-3da9f7938f92" width="590" alt="Neuron circuit representation">
+</div>
 
 ---
 
-*This section bridges neuroscience and communication theory — exploring how a biological non-linearity can exhibit an effect fundamental to signal processing.*
+## 💻 Implementation Notes
+
+The neuron can be represented as an **electro-chemical integrate-and-fire cell**, analogous to an electronic RC circuit.  
+
+**Files and their purposes:**
+
+| File            | Purpose |
+|-----------------|---------|
+| `axonB10.hoc`   | Constructs a myelinated CNS neuron stimulated **exogenously** by a sinusoidal wave and **endogenously**. |
+| `axonB5.hoc`    | Stimulates the neuron **endogenously**. |
+| `axonA.hoc`     | Stimulates the neuron with **two exogenous waves** simultaneously. |
+| `mosinit.hoc`   | Launches a **GUI** to visualize results. |
+
+---
+
+## 🏃 How to Run the Code
+
+1. Open NEURON and load the desired `.hoc` file (e.g., `mosinit.hoc`).  
+2. Use the GUI to **start simulations** and visualize membrane potentials.  
+3. For dual-signal heterodyning experiments, run `axonA.hoc`.  
+4. Analyze results using NEURON tools or export data for **FFT analysis**.  
