@@ -1,6 +1,6 @@
 # Thesis
 
-### Modeling Heterodyning Effects in Neurons using NEURON Simulator
+### Modeling Signal Mixing Effects in Neurons using NEURON Simulator
 
 This code demonstrates how to construct a **myelinated neuron model** in **NEURON** that is stimulated by **alternating current (AC)** sources through both the **extracellular** and **intracellular** media.
 
@@ -8,14 +8,14 @@ This code demonstrates how to construct a **myelinated neuron model** in **NEURO
 
 ### 🧠 Concept Overview
 
-**Heterodyning** is a process in which two signals of different frequencies are fed into a **non-linear electrical component**, resulting in the generation of new frequencies — specifically, the **sum** and **difference** of the original frequencies.
+**Signal mixing** is a process in which two signals of different frequencies interact through a **non-linear electrical component**, resulting in the generation of new frequencies — specifically, the **sum** and **difference** of the original frequencies.
 
 If two input frequencies are:
 
 - \( f_1 \)
 - \( f_2 \)
 
-Then, the resulting frequencies after heterodyning are:
+Then, the resulting frequencies after signal mixing are:
 
 - **Sum frequency:** \( f_1 + f_2 \)
 - **Difference frequency:** \( |f_1 - f_2| \)
@@ -42,7 +42,7 @@ Interestingly, the **axon hillock** in neurons is also **non-linear**, and its i
 I_t = g_{Na,\text{init}} \, m^3 h (V - E_{Na}) \;+\; g_{K,\text{init}} \, n^4 (V - E_{K}) \;+\; g_{L,\text{init}} (V - E_{L})
 \]
 
-This suggests that if two different electrical signals are applied to a neuron, **heterodyning** could theoretically occur — leading to **frequency mixing** in biological systems.
+This suggests that if two different electrical signals are applied to a neuron, **signal mixing** could theoretically occur — leading to the generation of new frequency components in biological systems.
 
 ---
 
@@ -52,18 +52,16 @@ To test this hypothesis, the NEURON model:
 
 - Simulates a **myelinated axon**.
 - Applies **two AC signals** via intracellular and extracellular stimulation.
-- Observes whether **heterodyned frequency components** appear in the resulting membrane potential.
+- Observes whether **mixed-frequency components** appear in the resulting membrane potential.
 
----
 ---
 
 ## 📷 Figures
 
-**Neuron Heterodyning Model Diagram**  
+**Neuron Signal Mixing Model Diagram**  
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/3fe820ef-4581-46d6-947a-671e52393870" >
-
 </div>
 
 **Electronic Circuit Representation of Neuron**  
@@ -82,22 +80,23 @@ The neuron can be represented as an **electro-chemical integrate-and-fire cell**
 
 | File            | Purpose |
 |-----------------|---------|
-| `axon10.hoc`   | Constructs a model of a myelinated neuron and axon in the CNS. The model includes a synapse from where one can put in intracellular stimulus. Further it uses Double-Cable model that extends to electrical extracellular fields or RC network attached to a voltage source. Here, one can stimulate the neuron extracellularly. |
-| `initB5.hoc`     | Stimulates the neuron with **one endogenous wave** and another exogenous wave simultaneously. |
-| `initA.hoc`    | Stimulates the neuron **with two   endogneously applied** sine waves. |
-| `initB5.hoc`     | Stimulates the neuron with **two exogenously applied  waves** simultaneously. |
-| `mosinit.hoc`   | Launches a **GUI** to visualize results. |
+| `axon10.hoc`   | Constructs a model of a myelinated neuron and axon in the CNS. The model includes a synapse where intracellular stimulation can be applied. It also uses a double-cable model that extends to extracellular electrical fields or an RC network attached to a voltage source, allowing extracellular stimulation of the neuron. |
+| `initB5.hoc`   | Stimulates the neuron with **one endogenous wave** and one **exogenous wave** simultaneously. |
+| `initA.hoc`    | Stimulates the neuron with **two endogenously applied** sine waves. |
+| `initB5.hoc`   | Stimulates the neuron with **two exogenously applied** waves simultaneously. |
+| `mosinit.hoc`  | Launches a **GUI** to visualize results. |
 
 ---
 
 ## 🏃 How to Run the Code
 
-1. Download entire codebase to a location on your computer and unzip.
-2. Open command terminal for windows and then cd to the place you have saved.
-3. Download neuron.
-4. Run nrnivmodl.
-5. Run mosinit.hoc or nrnguimosinit.hoc
-6. Three buttons pop up choose any to see corresponding time domain effect from stimulation in yellow curve label.
-7. To do FFT analysis- there will be  a graph with a yellow curve run till end of simulation or change it to shorter period of time if your sampling frequency is higher, right click on it and select pick vector.
-8. Click on the yellow curve.
-9. Go to Vector option in top and choose save to option in.dat format
+1. Download the entire codebase to a location on your computer and unzip it.
+2. Open the Windows command terminal and use `cd` to navigate to the saved location.
+3. Download and install NEURON.
+4. Run `nrnivmodl`.
+5. Run `mosinit.hoc` or `nrngui mosinit.hoc`.
+6. Three buttons should appear. Choose any option to see the corresponding time-domain stimulation effect in the yellow curve.
+7. To perform FFT analysis, run the simulation until the end or shorten the simulation time if your sampling frequency is higher.
+8. Right-click the graph containing the yellow curve and select **Pick Vector**.
+9. Click on the yellow curve.
+10. Go to the **Vector** option at the top and choose **Save To** in `.dat` format.
