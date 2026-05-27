@@ -24,14 +24,9 @@ $$
 
 The combined input signal is therefore:
 
-$$
-x(t)
-=
-A_1 \cos(2\pi f_1 t)
-+
-A_2 \cos(2\pi f_2 t).
-$$
-
+\[
+x(t) = A_1 \cos(2\pi f_1 t) + A_2 \cos(2\pi f_2 t)
+\]
 In a perfectly linear system, the output would only contain the original input frequencies, $f_1$ and $f_2$.
 
 However, in a non-linear system, the output can contain additional frequency components. A general non-linear input-output relationship can be written as:
