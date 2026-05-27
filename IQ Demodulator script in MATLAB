@@ -1,0 +1,285 @@
+%% IQ Demodulation and FFT Analysis of Heterodyned Neural Signals
+% Author: Arush Sinha
+%
+% This script analyses exported NEURON voltage traces from DBS stimulation.
+% It performs:
+%   1. File loading across carrier frequencies
+%   2. Bandpass filtering around each carrier
+%   3. IQ demodulation
+%   4. Envelope extraction
+%   5. Cross-correlation with a 3 Hz synaptic ground-truth signal
+%   6. FFT analysis of the demodulated envelope
+%   7. Summary plots of correlation, lag, and RMS versus frequency
+
+clc;
+clear;
+close all;
+
+%% ===================== User Settings =====================
+
+Fs = 40e3;                         % Sampling frequency in Hz
+
+data_folder = "../data";           % Folder containing .dat files
+results_folder = "../results";     % Folder to save plots
+
+file_prefix = "DBS_Suprathreshold_";
+file_suffix = ".dat";
+synapse_file = "Synapse_3Hz.dat";
+
+% Create results folder if it does not exist
+if ~exist(results_folder, "dir")
+    mkdir(results_folder);
+end
+
+%% ===================== Find DBS Data Files =====================
+
+files = dir(fullfile(data_folder, file_prefix + "*" + file_suffix));
+
+if isempty(files)
+    error("No DBS files found. Check data_folder and file naming format.");
+end
+
+freq_list = nan(1, numel(files));
+file_names = strings(1, numel(files));
+
+for i = 1:numel(files)
+    fname = files(i).name;
+
+    % Extract final number from filename as carrier frequency
+    freq_match = regexp(fname, '(\d+(\.\d+)?)', 'match');
+
+    if ~isempty(freq_match)
+        freq_val = str2double(freq_match{end});
+        freq_list(i) = freq_val;
+        file_names(i) = fname;
+    else
+        warning("Could not extract frequency from file: %s", fname);
+    end
+end
+
+%% ===================== Preallocate Results =====================
+
+R_vals = nan(size(freq_list));
+Lag_vals = nan(size(freq_list));
+RMS_vals = nan(size(freq_list));
+
+%% ===================== Load Synaptic Reference Signal =====================
+
+synapse_path = fullfile(data_folder, synapse_file);
+
+if ~isfile(synapse_path)
+    error("Missing synapse reference file: %s", synapse_path);
+end
+
+syn_data = load(synapse_path);
+
+syn_time_s = syn_data(:, 1) / 1000;     % Convert ms to seconds
+syn_voltage = syn_data(:, 2);           % Voltage in mV
+
+% Low-pass filter ground-truth synaptic signal around biological frequency
+syn_filtered = lowpass(syn_voltage - mean(syn_voltage), 5, Fs);
+
+%% ===================== Main Analysis Loop =====================
+
+for k = 1:length(freq_list)
+
+    target_freq = freq_list(k);
+
+    if isnan(target_freq)
+        continue;
+    end
+
+    file_name = sprintf("%s%g%s", file_prefix, target_freq, file_suffix);
+    file_path = fullfile(data_folder, file_name);
+
+    if ~isfile(file_path)
+        warning("Missing file: %s", file_path);
+        continue;
+    end
+
+    fprintf("Processing %s at %.2f Hz...\n", file_name, target_freq);
+
+    %% Load DBS Voltage Data
+
+    data = load(file_path);
+
+    time_s = data(:, 1) / 1000;      % Convert ms to seconds
+    voltage = data(:, 2);            % Voltage in mV
+
+    %% Bandpass Filter Around Carrier Frequency
+
+    low_cutoff = max(target_freq - 5, 0.1);
+    high_cutoff = target_freq + 5;
+
+    voltage_filt = bandpass(voltage - mean(voltage), ...
+                            [low_cutoff high_cutoff], Fs);
+
+    figure("Name", "Filtered Voltage", "Color", "w");
+    plot(time_s, voltage_filt, "LineWidth", 1.5);
+    xlabel("Time (s)");
+    ylabel("Filtered Voltage (mV)");
+    title(sprintf("Filtered Voltage vs Time: %.1f Hz Carrier", target_freq));
+    grid on;
+
+    saveas(gcf, fullfile(results_folder, ...
+        sprintf("filtered_voltage_%.1fHz.png", target_freq)));
+
+    %% IQ Demodulation
+
+    IQ = rf2iq(voltage_filt, Fs, target_freq);
+
+    IQ_real = real(IQ);
+    IQ_imag = imag(IQ);
+
+    % Low-pass filter baseband I/Q components
+    IQ_real = lowpass(IQ_real, 5, Fs);
+    IQ_imag = lowpass(IQ_imag, 5, Fs);
+
+    % Envelope extraction
+    envelope = abs(IQ);
+    envelope = lowpass(envelope, 5, Fs);
+
+    %% Align Envelope with Synaptic Reference
+
+    min_len = min(length(envelope), length(syn_filtered));
+
+    env_trim = envelope(1:min_len);
+    syn_trim = syn_filtered(1:min_len);
+
+    % Rescale both signals to [-1, 1] for shape comparison
+    env_trim = rescale(env_trim, -1, 1);
+    syn_trim = rescale(syn_trim, -1, 1);
+
+    t_plot = (0:min_len-1) / Fs;
+
+    %% Cross-Correlation
+
+    max_lag = round(0.5 * Fs);   % +/- 0.5 seconds
+
+    [xEnv, lagEnv] = xcorr(env_trim, syn_trim, max_lag, "coeff");
+
+    [~, idxR] = max(abs(xEnv));
+
+    bestLag = lagEnv(idxR);
+
+    R_vals(k) = abs(xEnv(idxR));
+    Lag_vals(k) = bestLag / Fs;
+    RMS_vals(k) = rms(env_trim);
+
+    %% Shift Envelope by Best Lag
+
+    if bestLag > 0
+        shifted_env = [zeros(bestLag, 1); env_trim(1:end-bestLag)];
+    elseif bestLag < 0
+        shifted_env = [env_trim(-bestLag+1:end); zeros(-bestLag, 1)];
+    else
+        shifted_env = env_trim;
+    end
+
+    min_len_shifted = min(length(shifted_env), length(syn_trim));
+
+    shifted_env = shifted_env(1:min_len_shifted);
+    shifted_syn = syn_trim(1:min_len_shifted);
+    shifted_time = t_plot(1:min_len_shifted);
+
+    %% Plot Demodulated Envelope vs Ground Truth
+
+    figure("Name", "Demodulated Envelope vs Synaptic Reference", ...
+           "Color", "w", "Position", [200 200 900 400]);
+
+    plot(shifted_time, -shifted_env, "r", "LineWidth", 1.2);
+    hold on;
+    plot(shifted_time, shifted_syn, "b", "LineWidth", 1.2);
+
+    legend("Demodulated Envelope", "Synaptic Ground Truth");
+    xlabel("Time (s)");
+    ylabel("Normalised Amplitude");
+
+    title(sprintf(["Envelope vs Synaptic Reference @ %.1f Hz Carrier\n" ...
+                   "Correlation R = %.3f, Lag = %.3f ms"], ...
+                   target_freq, R_vals(k), Lag_vals(k) * 1000));
+
+    grid on;
+
+    saveas(gcf, fullfile(results_folder, ...
+        sprintf("envelope_vs_synapse_%.1fHz.png", target_freq)));
+
+    %% FFT of Demodulated Signals
+
+    N = length(IQ_real);
+
+    f_axis = (0:N-1) * (Fs / N);
+    f_axis = f_axis(1:floor(N/2));
+
+    FFT_real = abs(fft(IQ_real) / N);
+    FFT_imag = abs(fft(IQ_imag) / N);
+    FFT_env = abs(fft(envelope) / N);
+
+    FFT_real = FFT_real(1:floor(N/2));
+    FFT_imag = FFT_imag(1:floor(N/2));
+    FFT_env = FFT_env(1:floor(N/2));
+
+    figure("Name", "FFT of Demodulated Envelope", ...
+           "Color", "w", "Position", [300 300 900 600]);
+
+    plot(f_axis, 20 * log10(FFT_env + eps), "r-", "LineWidth", 1.5);
+    xlim([0 50]);
+
+    xlabel("Frequency (Hz)");
+    ylabel("Magnitude (dB)");
+    title(sprintf("FFT of Demodulated Envelope @ %.1f Hz Carrier", target_freq));
+    grid on;
+
+    saveas(gcf, fullfile(results_folder, ...
+        sprintf("fft_demodulated_envelope_%.1fHz.png", target_freq)));
+
+end
+
+%% ===================== Summary Plots =====================
+
+validIdx = ~isnan(freq_list) & ~isnan(R_vals) & ...
+           ~isnan(Lag_vals) & ~isnan(RMS_vals);
+
+freq_valid = freq_list(validIdx);
+R_valid = R_vals(validIdx);
+Lag_valid = Lag_vals(validIdx);
+RMS_valid = RMS_vals(validIdx);
+
+[freq_sorted, sortIdx] = sort(freq_valid);
+
+R_sorted = R_valid(sortIdx);
+Lag_sorted = Lag_valid(sortIdx);
+RMS_sorted = RMS_valid(sortIdx);
+
+figure("Name", "Summary Metrics over Frequency", ...
+       "Color", "w", "Position", [100 100 1000 700]);
+
+subplot(3, 1, 1);
+plot(log10(freq_sorted), R_sorted, "r-o", "LineWidth", 1.5);
+ylabel("Max Correlation R");
+title("Correlation vs Carrier Frequency");
+grid on;
+
+subplot(3, 1, 2);
+plot(log10(freq_sorted), abs(Lag_sorted) * 1000, "b--o", "LineWidth", 1.5);
+ylabel("Lag (ms)");
+title("Lag vs Carrier Frequency");
+grid on;
+
+subplot(3, 1, 3);
+plot(log10(freq_sorted), RMS_sorted ./ max(RMS_sorted), "k-.^", "LineWidth", 1.5);
+xlabel("log_{10}(Carrier Frequency / Hz)");
+ylabel("Relative RMS");
+title("Relative RMS vs Carrier Frequency");
+grid on;
+
+saveas(gcf, fullfile(results_folder, "summary_metrics_over_frequency.png"));
+
+%% ===================== Save Numerical Results =====================
+
+summary_table = table(freq_sorted(:), R_sorted(:), Lag_sorted(:), RMS_sorted(:), ...
+    'VariableNames', {'CarrierFrequency_Hz', 'Correlation_R', 'Lag_s', 'RMS'});
+
+writetable(summary_table, fullfile(results_folder, "summary_metrics.csv"));
+
+disp("Analysis complete. Results saved in the results folder.");
