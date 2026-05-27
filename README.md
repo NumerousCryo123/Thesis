@@ -10,7 +10,7 @@ The project investigates whether a biologically realistic neuron model can behav
 
 **Signal mixing** is the process where two signals of different frequencies interact inside a **non-linear system**, producing new frequencies at the **sum** and **difference** of the original input frequencies.
 
-If two input signals are applied,
+If two input signals are applied, where the first input is $x_1(t)$ and the second input is $x_2(t)$, then:
 
 $$
 x_1(t) = A_1 \cos(2\pi f_1 t)
@@ -19,10 +19,10 @@ $$
 and
 
 $$
-x_2(t) = A_2 \cos(2\pi f_2 t),
+x_2(t) = A_2 \cos(2\pi f_2 t).
 $$
 
-then the combined input is
+The combined input signal is therefore:
 
 $$
 x(t)
@@ -32,15 +32,9 @@ A_1 \cos(2\pi f_1 t)
 A_2 \cos(2\pi f_2 t).
 $$
 
-In a perfectly linear system, the output would only contain the original frequencies:
+In a perfectly linear system, the output would only contain the original input frequencies, $f_1$ and $f_2$.
 
-$$
-f_1
-\quad \text{and} \quad
-f_2.
-$$
-
-However, in a non-linear system, the output can contain additional frequency components. A general non-linear input-output relationship can be written as
+However, in a non-linear system, the output can contain additional frequency components. A general non-linear input-output relationship can be written as:
 
 $$
 y(t)
@@ -74,7 +68,7 @@ $$
 \cos(2\pi f_2 t).
 $$
 
-Using the trigonometric identity
+Using the trigonometric identity:
 
 $$
 \cos(a)\cos(b)
@@ -87,7 +81,7 @@ $$
 \right],
 $$
 
-the cross-product becomes
+the cross-product becomes:
 
 $$
 A_1 A_2
@@ -98,7 +92,7 @@ A_1 A_2
 \right].
 $$
 
-Therefore, the non-linear system produces a difference-frequency component,
+Therefore, the non-linear system produces a difference-frequency component:
 
 $$
 f_{\mathrm{difference}}
@@ -106,7 +100,7 @@ f_{\mathrm{difference}}
 \left| f_1 - f_2 \right|,
 $$
 
-and a sum-frequency component,
+and a sum-frequency component:
 
 $$
 f_{\mathrm{sum}}
@@ -140,14 +134,14 @@ The membrane behaves like:
 - A **voltage-source network**, because each ion has a reversal potential.
 - A **non-linear device**, because ion-channel conductances depend on voltage.
 
-The membrane voltage dynamics can be written as
+The membrane voltage dynamics can be written as:
 
 $$
 C_m \frac{dV_m}{dt}
 =
 -I_{\mathrm{ion}}
 +
-I_{\mathrm{stim}},
+I_{\mathrm{stim}}.
 $$
 
 where:
@@ -157,7 +151,7 @@ where:
 - $I_{\mathrm{ion}}$ is the total ionic current.
 - $I_{\mathrm{stim}}$ is the applied stimulation current or external field contribution.
 
-The total ionic current is
+The total ionic current is:
 
 $$
 I_{\mathrm{ion}}
@@ -169,7 +163,7 @@ I_{\mathrm{K}}
 I_{\mathrm{L}}.
 $$
 
-The sodium current is
+The sodium current is:
 
 $$
 I_{\mathrm{Na}}
@@ -180,7 +174,7 @@ V_m - E_{\mathrm{Na}}
 \right).
 $$
 
-The potassium current is
+The potassium current is:
 
 $$
 I_{\mathrm{K}}
@@ -191,7 +185,7 @@ V_m - E_{\mathrm{K}}
 \right).
 $$
 
-The leakage current is
+The leakage current is:
 
 $$
 I_{\mathrm{L}}
@@ -202,7 +196,7 @@ V_m - E_{\mathrm{L}}
 \right).
 $$
 
-Therefore, the full ionic-current expression is
+Therefore, the full ionic-current expression is:
 
 $$
 I_{\mathrm{ion}}
@@ -244,15 +238,7 @@ The biological hypothesis of this project is:
 
 > If endogenous and exogenous AC signals interact at a non-linear neuronal region such as the axon hillock, the neuron may generate new mixed-frequency components.
 
-For two stimulation frequencies,
-
-$$
-f_1
-\quad \text{and} \quad
-f_2,
-$$
-
-the expected mixed components are
+For two stimulation frequencies, $f_1$ and $f_2$, the expected mixed components are:
 
 $$
 f_{\mathrm{sum}}
@@ -268,23 +254,7 @@ f_{\mathrm{difference}}
 \left| f_1 - f_2 \right|.
 $$
 
-For example, if
-
-$$
-f_1
-=
-5000 \ \mathrm{Hz}
-$$
-
-and
-
-$$
-f_2
-=
-5003 \ \mathrm{Hz},
-$$
-
-then the difference frequency is
+For example, if $f_1 = 5000 \ \mathrm{Hz}$ and $f_2 = 5003 \ \mathrm{Hz}$, then the difference frequency is:
 
 $$
 \left| f_2 - f_1 \right|
@@ -333,11 +303,7 @@ The workflow is:
 5. Analyse the exported signals in MATLAB.
 6. Use IQ demodulation, envelope extraction, cross-correlation, RMS, and FFT to check for recovered low-frequency components.
 
-The expected evidence for signal mixing is the appearance of a frequency component close to
-
-$$
-\left| f_1 - f_2 \right|.
-$$
+The expected evidence for signal mixing is the appearance of a frequency component close to $|f_1 - f_2|$.
 
 ---
 
@@ -494,23 +460,7 @@ This file runs an exogenous two-frequency stimulation case.
 
 It applies two close-frequency extracellular sine waves. This is important for testing whether the neuron can generate a low-frequency difference component through non-linear mixing.
 
-For example,
-
-$$
-f_1
-=
-5000 \ \mathrm{Hz},
-$$
-
-and
-
-$$
-f_2
-=
-5003 \ \mathrm{Hz}.
-$$
-
-The expected difference frequency is
+For example, if $f_1 = 5000 \ \mathrm{Hz}$ and $f_2 = 5003 \ \mathrm{Hz}$, the expected difference frequency is:
 
 $$
 f_{\mathrm{difference}}
@@ -730,29 +680,9 @@ FFT analysis
 Summary plots and metrics
 ```
 
-The main target is to detect whether the demodulated output contains a component near
+The main target is to detect whether the demodulated output contains a component near $|f_1 - f_2|$.
 
-$$
-\left| f_1 - f_2 \right|.
-$$
-
-For example, if the stimulation frequencies are
-
-$$
-f_1
-=
-5000 \ \mathrm{Hz}
-$$
-
-and
-
-$$
-f_2
-=
-5003 \ \mathrm{Hz},
-$$
-
-then the expected recovered component is
+For example, if the stimulation frequencies are $f_1 = 5000 \ \mathrm{Hz}$ and $f_2 = 5003 \ \mathrm{Hz}$, then the expected recovered component is:
 
 $$
 f_{\mathrm{difference}}
@@ -805,23 +735,7 @@ f_{\mathrm{difference}}
 \left| f_1 - f_2 \right|.
 $$
 
-For example, if the applied stimulation frequencies are
-
-$$
-f_1
-=
-5000 \ \mathrm{Hz}
-$$
-
-and
-
-$$
-f_2
-=
-5003 \ \mathrm{Hz},
-$$
-
-then the expected recovered component is
+For example, if the applied stimulation frequencies are $f_1 = 5000 \ \mathrm{Hz}$ and $f_2 = 5003 \ \mathrm{Hz}$, then the expected recovered component is:
 
 $$
 f_{\mathrm{difference}}
