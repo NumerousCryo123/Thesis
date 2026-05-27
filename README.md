@@ -118,9 +118,99 @@ Clone the repository with `git clone https://github.com/NumerousCryo123/Thesis.g
 
 ## 📄 7. Purpose of Each NEURON File
 
-**`mosinit.hoc`** — Main startup file. Loads the NEURON GUI and provides buttons for selecting different simulation cases. **`axon10.hoc`** — Main myelinated axon model. Defines the soma, nodes of Ranvier, internodes, geometry, extracellular mechanisms, passive internodal properties, and active nodal dynamics. **`axon5.hoc`** — Alternative axon model for comparison with a different configuration or earlier model version. **`Neuron_Class.hoc`** — Defines the neuron using a reusable HOC template, making the model more modular and object-oriented. **`Node.hoc`** — Focuses on node-of-Ranvier behaviour where ion-channel activity is concentrated. **`initA.hoc`** — Runs an endogenous stimulation case using `IClamp` sinusoidal current and records the voltage response. **`initA5.hoc`** — Alternative endogenous stimulation setup for testing different parameters. **`initB5.hoc`** — Runs an exogenous two-frequency stimulation case applying two close-frequency extracellular sine waves to test whether the neuron generates a difference-frequency component. **`initB10.hoc`** — Runs a combined endogenous and exogenous stimulation case, adding synaptic activity alongside an extracellular sinusoidal field. **`protocolsA.hoc`** — Defines stimulation protocols including pulse, square-wave, and sine-wave waveform logic. **`protocolsB.hoc`** — Defines additional protocols for uniform gradient-field stimulation. **`thresh4.hoc`** — Performs excitation-threshold detection using binary search to estimate the stimulation amplitude required to produce an action potential. **`interpxyz.hoc`** — Helper file for interpolation or spatial mapping supporting coordinate-dependent extracellular stimulation. **`THISFILE.hoc`** — Additional testing script storing an extra experimental configuration used during development. **`Strengthen_Connections.hoc`** — Tests how changing connection strength or coupling parameters affects the neuron model. **`AXNODE.mod`** — Custom axon-node mechanism supporting nodal electrical behaviour at the active regions of the myelinated axon. **`fh.mod`** — Frankenhaeuser-Huxley-style ion-channel mechanism providing biologically realistic non-linear sodium and potassium channel dynamics. **`fsquare.mod`** — Square-wave stimulation mechanism for pulse-based or biphasic protocols. **`fzap.mod`** — ZAP/frequency-sweep stimulation mechanism for testing neuron response across a range of frequencies. **`xstim.mod`** — Extracellular stimulation mechanism allowing external electric fields to be applied to the neuron model. **`xtra.mod`** — Additional extracellular coupling support, coupling external potentials into the NEURON membrane equations along the axon. **`.ses` files** (`basicrig.ses`, `modified_basicrig.ses`, `varstep.ses`, `vext_eext.ses`, `vvsx.ses`) — NEURON GUI session files storing graph layouts, panels, and visualisation window configurations. **`.dat` / `.txt` files** (`plottingdata.dat`, `plottingdatan.dat`, `d.txt`) — Exported simulation data and intermediate outputs. **Compiled files** (`*.c`, `*.o`, `nrnmech.dll`, `x86_64/`) — Generated automatically when NEURON compiles the `.mod` files. Do not edit manually.
+**`mosinit.hoc`** — Main startup file for the NEURON project. It loads the NEURON GUI and presents a panel of buttons for selecting different simulation cases. It exists so the project can be launched from a simple interface rather than requiring each script to be loaded manually.
 
 ---
+
+**`axon10.hoc`** — The main myelinated axon model. It defines the soma, nodes of Ranvier, internodes, geometry, extracellular mechanisms, passive internodal properties, and active nodal dynamics. This is the core biological model used to test whether a myelinated axon can generate mixed-frequency behaviour.
+
+---
+
+**`axon5.hoc`** — An alternative axon model. It exists to allow comparison with a different axon configuration or an earlier model version without overwriting the main `axon10.hoc` model.
+
+---
+
+**`Neuron_Class.hoc`** — Defines the neuron using a reusable HOC template. It exists to make the model more modular and object-oriented, so the neuron structure can be reused, extended, or instantiated more cleanly across different simulation files.
+
+---
+
+**`Node.hoc`** — Focuses specifically on node-of-Ranvier behaviour. Nodes of Ranvier are important because ion-channel activity is concentrated there. This file is useful for studying local non-linear membrane behaviour at the active regions of the myelinated axon.
+
+---
+
+**`initA.hoc`** — Runs an endogenous stimulation case. It applies internally generated sinusoidal current stimulation using `IClamp` and records the voltage response. It exists to test how the neuron responds to internally applied electrical activity alone.
+
+---
+
+**`initA5.hoc`** — An alternative endogenous stimulation setup. It exists for testing different endogenous stimulation parameters or for keeping a separate experimental configuration without modifying the main `initA.hoc` file.
+
+---
+
+**`initB5.hoc`** — Runs an exogenous two-frequency stimulation case. It applies two close-frequency extracellular sine waves to the axon model. This is one of the key simulation files for testing whether the neuron can generate a low-frequency difference component through non-linear mixing. For example, if $f_1 = 5000\ \mathrm{Hz}$ and $f_2 = 5003\ \mathrm{Hz}$, the expected difference frequency is $f_{\mathrm{difference}} = |f_2 - f_1| = 3\ \mathrm{Hz}$.
+
+---
+
+**`initB10.hoc`** — Runs a combined endogenous and exogenous stimulation case. It adds synaptic or endogenous activity alongside an applied extracellular sinusoidal field. It exists to test whether external AC stimulation can interact with endogenous neural activity through non-linear membrane dynamics.
+
+---
+
+**`protocolsA.hoc`** — Defines stimulation protocols for the endogenous simulation cases. It includes waveform logic for pulse, square-wave, and sine-wave stimulation. It exists to standardise stimulation experiments and threshold-testing conditions across runs.
+
+---
+
+**`protocolsB.hoc`** — Defines additional stimulation protocols, particularly for uniform gradient-field stimulation. It exists so exogenous field stimulation can be tested systematically under different waveform and threshold conditions.
+
+---
+
+**`thresh4.hoc`** — Performs excitation-threshold detection. It uses a binary search approach to estimate the stimulation amplitude required to produce an action potential. If the stimulus is too low no spike occurs; if it is high enough a spike is generated. The script narrows between these two cases until the threshold is estimated.
+
+---
+
+**`interpxyz.hoc`** — A helper file for interpolation or spatial mapping. It supports coordinate-dependent extracellular stimulation, where field values need to be mapped or interpolated along the axon geometry.
+
+---
+
+**`THISFILE.hoc`** — An additional simulation and testing script. It stores an extra experimental configuration used during development, allowing tests to be run without modifying the main simulation files.
+
+---
+
+**`Strengthen_Connections.hoc`** — Tests how changing connection strength or coupling parameters affects the neuron model. It exists to explore how synaptic or electrical coupling influences the overall model behaviour.
+
+---
+
+**`AXNODE.mod`** — A custom axon-node mechanism. It supports the active nodal electrical behaviour required at the nodes of Ranvier. These regions require specialised dynamics distinct from the passive internodal sections.
+
+---
+
+**`fh.mod`** — Defines a Frankenhaeuser-Huxley-style ion-channel mechanism. It provides biologically realistic non-linear sodium and potassium channel dynamics, which are essential for testing signal mixing in the model.
+
+---
+
+**`fsquare.mod`** — Defines a square-wave stimulation mechanism. It exists so the model can be tested under pulse-based or biphasic stimulation protocols in addition to sinusoidal inputs.
+
+---
+
+**`fzap.mod`** — Defines a ZAP or frequency-sweep stimulation mechanism. It exists to test how the neuron responds across a range of stimulation frequencies in a single sweep.
+
+---
+
+**`xstim.mod`** — Defines an extracellular stimulation mechanism. It allows external electric fields to be applied to the neuron model, which is central to the exogenous stimulation cases in this project.
+
+---
+
+**`xtra.mod`** — Provides additional extracellular coupling support. It couples extracellular potentials into the NEURON membrane equations, allowing external fields to influence the membrane voltage at each point along the axon.
+
+---
+
+**`.ses` files** (`basicrig.ses`, `modified_basicrig.ses`, `varstep.ses`, `vext_eext.ses`, `vvsx.ses`) — NEURON GUI session files. They store graph layouts, panels, visualisation windows, and simulation settings. They exist to make it easy to reopen useful simulation views without reconfiguring the GUI each time.
+
+---
+
+**`.dat` and `.txt` files** (`plottingdata.dat`, `plottingdatan.dat`, `d.txt`) — Exported simulation data and intermediate outputs. These files store voltage traces, plotting data, or processed results useful for checking and post-processing simulation outputs.
+
+---
+
+**Compiled files** (`*.c`, `*.o`, `nrnmech.dll`, `x86_64/`) — Generated automatically when NEURON compiles the `.mod` mechanism files. They are required for running the compiled mechanisms but do not need to be edited manually.
 
 ## 🧮 8. MATLAB File Description
 
