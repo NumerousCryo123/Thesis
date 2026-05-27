@@ -10,57 +10,71 @@ The project investigates whether a biologically realistic neuron model can behav
 
 **Signal mixing** is the process where two signals of different frequencies interact inside a **non-linear system**, producing new frequencies at the **sum** and **difference** of the original input frequencies.
 
-If two input signals are:
+If two input signals are applied,
 
 $$
-x_1(t) = A_1\cos(2\pi f_1t)
+x_1(t) = A_1 \cos(2\pi f_1 t)
 $$
 
-and:
+and
 
 $$
-x_2(t) = A_2\cos(2\pi f_2t)
+x_2(t) = A_2 \cos(2\pi f_2 t),
 $$
 
-then the combined input is:
+then the combined input is
 
 $$
-x(t) = A_1\cos(2\pi f_1t) + A_2\cos(2\pi f_2t)
+x(t)
+=
+A_1 \cos(2\pi f_1 t)
++
+A_2 \cos(2\pi f_2 t).
 $$
 
-In a linear system, the output would only contain the original frequencies:
+In a perfectly linear system, the output would only contain the original frequencies:
 
 $$
 f_1
 \quad \text{and} \quad
-f_2
+f_2.
 $$
 
-However, in a non-linear system, the output can contain additional frequency components. A general non-linear relationship can be written as:
+However, in a non-linear system, the output can contain additional frequency components. A general non-linear input-output relationship can be written as
 
 $$
-y(t) = a_1x(t) + a_2x^2(t) + a_3x^3(t) + \cdots
+y(t)
+=
+a_1 x(t)
++
+a_2 x^2(t)
++
+a_3 x^3(t)
++
+\cdots .
 $$
 
-The second-order term produces:
+The second-order term is especially important for signal mixing:
 
 $$
 x^2(t)
 =
 \left[
-A_1\cos(2\pi f_1t)
+A_1 \cos(2\pi f_1 t)
 +
-A_2\cos(2\pi f_2t)
-\right]^2
+A_2 \cos(2\pi f_2 t)
+\right]^2 .
 $$
 
-The important mixing term is:
+Expanding this expression gives a cross-product term:
 
 $$
-2A_1A_2\cos(2\pi f_1t)\cos(2\pi f_2t)
+2 A_1 A_2
+\cos(2\pi f_1 t)
+\cos(2\pi f_2 t).
 $$
 
-Using the identity:
+Using the trigonometric identity
 
 $$
 \cos(a)\cos(b)
@@ -70,30 +84,34 @@ $$
 \cos(a-b)
 +
 \cos(a+b)
-\right]
+\right],
 $$
 
-the cross-product becomes:
+the cross-product becomes
 
 $$
-A_1A_2
+A_1 A_2
 \left[
-\cos(2\pi(f_1-f_2)t)
+\cos\left(2\pi(f_1-f_2)t\right)
 +
-\cos(2\pi(f_1+f_2)t)
-\right]
+\cos\left(2\pi(f_1+f_2)t\right)
+\right].
 $$
 
-Therefore, the non-linear system produces:
+Therefore, the non-linear system produces a difference-frequency component,
 
 $$
-f_{difference} = |f_1 - f_2|
+f_{\mathrm{difference}}
+=
+\left| f_1 - f_2 \right|,
 $$
 
-and:
+and a sum-frequency component,
 
 $$
-f_{sum} = f_1 + f_2
+f_{\mathrm{sum}}
+=
+f_1 + f_2.
 $$
 
 This is the key idea behind this project: if a neuron behaves as a non-linear electrical system, then two applied electrical signals may mix and generate sum and difference frequency components.
@@ -122,65 +140,87 @@ The membrane behaves like:
 - A **voltage-source network**, because each ion has a reversal potential.
 - A **non-linear device**, because ion-channel conductances depend on voltage.
 
-The membrane equation can be written as:
+The membrane voltage dynamics can be written as
 
 $$
-C_m\frac{dV_m}{dt}
+C_m \frac{dV_m}{dt}
 =
--I_{ion}
+-I_{\mathrm{ion}}
 +
-I_{stim}
+I_{\mathrm{stim}},
 $$
 
 where:
 
 - $C_m$ is the membrane capacitance.
 - $V_m$ is the membrane voltage.
-- $I_{ion}$ is the total ionic current.
-- $I_{stim}$ is the applied stimulation current or external field contribution.
+- $I_{\mathrm{ion}}$ is the total ionic current.
+- $I_{\mathrm{stim}}$ is the applied stimulation current or external field contribution.
 
-The total ionic current is:
+The total ionic current is
 
 $$
-I_{ion}
+I_{\mathrm{ion}}
 =
-I_{Na}
+I_{\mathrm{Na}}
 +
-I_K
+I_{\mathrm{K}}
 +
-I_L
+I_{\mathrm{L}}.
 $$
 
-with:
+The sodium current is
 
 $$
-I_{Na}
+I_{\mathrm{Na}}
 =
-g_{Na}m^3h(V_m - E_{Na})
+g_{\mathrm{Na}} m^3 h
+\left(
+V_m - E_{\mathrm{Na}}
+\right).
 $$
 
+The potassium current is
+
 $$
-I_K
+I_{\mathrm{K}}
 =
-g_Kn^4(V_m - E_K)
+g_{\mathrm{K}} n^4
+\left(
+V_m - E_{\mathrm{K}}
+\right).
 $$
 
+The leakage current is
+
 $$
-I_L
+I_{\mathrm{L}}
 =
-g_L(V_m - E_L)
+g_{\mathrm{L}}
+\left(
+V_m - E_{\mathrm{L}}
+\right).
 $$
 
-Therefore:
+Therefore, the full ionic-current expression is
 
 $$
-I_{ion}
+I_{\mathrm{ion}}
 =
-g_{Na}m^3h(V_m - E_{Na})
+g_{\mathrm{Na}} m^3 h
+\left(
+V_m - E_{\mathrm{Na}}
+\right)
 +
-g_Kn^4(V_m - E_K)
+g_{\mathrm{K}} n^4
+\left(
+V_m - E_{\mathrm{K}}
+\right)
 +
-g_L(V_m - E_L)
+g_{\mathrm{L}}
+\left(
+V_m - E_{\mathrm{L}}
+\right).
 $$
 
 The sodium and potassium currents are non-linear because the gating variables $m$, $h$, and $n$ depend on voltage and appear as powers such as $m^3h$ and $n^4$.
@@ -204,42 +244,54 @@ The biological hypothesis of this project is:
 
 > If endogenous and exogenous AC signals interact at a non-linear neuronal region such as the axon hillock, the neuron may generate new mixed-frequency components.
 
-For two stimulation frequencies:
+For two stimulation frequencies,
 
 $$
 f_1
 \quad \text{and} \quad
-f_2
+f_2,
 $$
 
-the expected mixed components are:
+the expected mixed components are
 
 $$
+f_{\mathrm{sum}}
+=
 f_1 + f_2
 $$
 
-and:
+and
 
 $$
-|f_1 - f_2|
+f_{\mathrm{difference}}
+=
+\left| f_1 - f_2 \right|.
 $$
 
-For example, if:
+For example, if
 
 $$
-f_1 = 5000 \text{ Hz}
+f_1
+=
+5000 \ \mathrm{Hz}
 $$
 
-and:
+and
 
 $$
-f_2 = 5003 \text{ Hz}
+f_2
+=
+5003 \ \mathrm{Hz},
 $$
 
-then the difference frequency is:
+then the difference frequency is
 
 $$
-|f_2 - f_1| = 3 \text{ Hz}
+\left| f_2 - f_1 \right|
+=
+\left| 5003 - 5000 \right|
+=
+3 \ \mathrm{Hz}.
 $$
 
 So two high-frequency stimulation signals could theoretically generate a low-frequency envelope or difference-frequency response.
@@ -281,10 +333,10 @@ The workflow is:
 5. Analyse the exported signals in MATLAB.
 6. Use IQ demodulation, envelope extraction, cross-correlation, RMS, and FFT to check for recovered low-frequency components.
 
-The expected evidence for signal mixing is the appearance of a frequency component close to:
+The expected evidence for signal mixing is the appearance of a frequency component close to
 
 $$
-|f_1 - f_2|
+\left| f_1 - f_2 \right|.
 $$
 
 ---
@@ -374,7 +426,7 @@ Open MATLAB and run:
 IQ Demodulator script in MATLAB
 ```
 
-The MATLAB script loads the exported NEURON traces, demodulates them, extracts the envelope, compares the recovered signal with a reference signal, and performs FFT analysis.
+The MATLAB script loads the exported NEURON traces, demodulates them, extracts the envelope through a normalisation process, compares the recovered signal with a reference signal, and performs FFT analysis.
 
 ---
 
@@ -442,20 +494,30 @@ This file runs an exogenous two-frequency stimulation case.
 
 It applies two close-frequency extracellular sine waves. This is important for testing whether the neuron can generate a low-frequency difference component through non-linear mixing.
 
-For example:
+For example,
 
 $$
-f_1 = 5000 \text{ Hz}
+f_1
+=
+5000 \ \mathrm{Hz},
 $$
 
-$$
-f_2 = 5003 \text{ Hz}
-$$
-
-Expected difference frequency:
+and
 
 $$
-|f_2 - f_1| = 3 \text{ Hz}
+f_2
+=
+5003 \ \mathrm{Hz}.
+$$
+
+The expected difference frequency is
+
+$$
+f_{\mathrm{difference}}
+=
+\left| f_2 - f_1 \right|
+=
+3 \ \mathrm{Hz}.
 $$
 
 This file is one of the key simulation cases for testing signal mixing.
@@ -495,11 +557,17 @@ It checks whether a simulation produces an action potential and uses binary sear
 The basic idea is:
 
 $$
-\text{stimulus too low} \rightarrow \text{no spike}
+\text{stimulus too low}
+\rightarrow
+\text{no spike},
 $$
 
+and
+
 $$
-\text{stimulus high enough} \rightarrow \text{spike}
+\text{stimulus high enough}
+\rightarrow
+\text{spike}.
 $$
 
 The script searches between these cases until the threshold is estimated.
@@ -662,28 +730,36 @@ FFT analysis
 Summary plots and metrics
 ```
 
-The main target is to detect whether the demodulated output contains a component near:
+The main target is to detect whether the demodulated output contains a component near
 
 $$
-|f_1 - f_2|
+\left| f_1 - f_2 \right|.
 $$
 
-For example, if the stimulation frequencies are:
+For example, if the stimulation frequencies are
 
 $$
-5000 \text{ Hz}
+f_1
+=
+5000 \ \mathrm{Hz}
 $$
 
-and:
+and
 
 $$
-5003 \text{ Hz}
+f_2
+=
+5003 \ \mathrm{Hz},
 $$
 
-then the expected recovered component is:
+then the expected recovered component is
 
 $$
-3 \text{ Hz}
+f_{\mathrm{difference}}
+=
+\left| f_2 - f_1 \right|
+=
+3 \ \mathrm{Hz}.
 $$
 
 ---
@@ -724,25 +800,33 @@ flowchart TD
 The purpose of the MATLAB algorithm is to test whether the demodulated voltage response contains a recovered component near the expected difference frequency:
 
 $$
-f_{difference} = |f_1 - f_2|
+f_{\mathrm{difference}}
+=
+\left| f_1 - f_2 \right|.
 $$
 
-For example, if the applied stimulation frequencies are:
+For example, if the applied stimulation frequencies are
 
 $$
-f_1 = 5000 \text{ Hz}
+f_1
+=
+5000 \ \mathrm{Hz}
 $$
 
-and:
+and
 
 $$
-f_2 = 5003 \text{ Hz}
+f_2
+=
+5003 \ \mathrm{Hz},
 $$
 
-then the expected recovered component is:
+then the expected recovered component is
 
 $$
-f_{difference} = 3 \text{ Hz}
+f_{\mathrm{difference}}
+=
+3 \ \mathrm{Hz}.
 $$
 
 In simple terms, the MATLAB pipeline checks whether high-frequency neural stimulation contains a low-frequency envelope that matches the original reference activity.
